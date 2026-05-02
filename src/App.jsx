@@ -352,6 +352,8 @@ export default function SkillCompass() {
   const [moreModels, setMoreModels] = useState(false);
   const [whyOpen, setWhyOpen] = useState(false);
   const [phases, setPhases] = useState(null);
+  const [customizeOpen, setCustomizeOpen] = useState(false);
+  const [selectedSkillId, setSelectedSkillId] = useState(null);
   const clarifyRef = useRef(clarify);
   clarifyRef.current = clarify;
   const rRef = useRef(0);
@@ -629,7 +631,7 @@ export default function SkillCompass() {
           <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Code
           </button>
-          <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
+          <button onClick={()=>setCustomizeOpen(true)} className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg> Customize
           </button>
           <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
@@ -692,6 +694,8 @@ export default function SkillCompass() {
                           setCustoms(p => [...p.filter(s=>s.id!==sk.id), sk]);
                           setTele(p => ({...p, built:p.built+1}));
                           setToast({text:`Skill "${sk.name}" saved to Settings → Customize → Skills`});
+                          setSelectedSkillId(sk.id);
+                          setTimeout(() => setCustomizeOpen(true), 400);
                         }} disabled={pend} className="text-xs font-medium px-3 py-1.5 rounded-md flex items-center gap-1" style={{background:"var(--sc-accent)",color:"white"}}><Check size={12}/> Save as Skill</button>
                         <button onClick={async ()=>{
                           const sk = m.skillData;
@@ -806,6 +810,121 @@ export default function SkillCompass() {
               <div className="mt-3 text-xs px-3 py-2 rounded-lg" style={{background:"var(--sc-success-bg)",color:"var(--sc-success)"}}>Saves ~{fmtTok(plainC.p70-skillC.p70)} tokens per use.</div>
             </div>
           </div>
+        </div>
+      </div>}
+
+      {/* ═══ CUSTOMIZE PANEL — Settings → Customize → Skills ═══ */}
+      {customizeOpen && <div className="absolute inset-0 flex" style={{zIndex:200,background:"var(--sc-bg)"}}>
+        {/* Left nav */}
+        <div className="flex flex-col shrink-0" style={{width:200,borderRight:"1px solid var(--sc-border)",background:"var(--sc-bg)"}}>
+          <div className="flex items-center gap-2 px-4 py-4" style={{height:56}}>
+            <button onClick={()=>setCustomizeOpen(false)} className="p-1 rounded" style={{color:"var(--sc-muted)"}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <span className="text-sm font-semibold" style={{color:"var(--sc-fg)"}}>Customize</span>
+          </div>
+          <div className="px-3 space-y-0.5">
+            <button className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm font-medium" style={{background:"var(--sc-bubble)",color:"var(--sc-fg)"}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Skills
+            </button>
+            <button className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-muted)"}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Connectors
+            </button>
+          </div>
+        </div>
+
+        {/* Skills list */}
+        <div className="flex flex-col shrink-0" style={{width:260,borderRight:"1px solid var(--sc-border)",background:"var(--sc-bg)"}}>
+          <div className="flex items-center justify-between px-4 py-4" style={{height:56,borderBottom:"1px solid var(--sc-border)"}}>
+            <span className="text-sm font-semibold" style={{color:"var(--sc-fg)"}}>Skills</span>
+            <div className="flex items-center gap-1">
+              <button className="p-1.5 rounded" style={{color:"var(--sc-muted)"}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </button>
+              <button className="p-1.5 rounded" style={{color:"var(--sc-muted)"}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto sc-scroll py-2">
+            {/* Anthropic built-in skills */}
+            <div className="px-3 py-1.5">
+              <div className="text-xs font-medium px-2 mb-1" style={{color:"var(--sc-muted)"}}>Anthropic skills</div>
+              {[{id:"excel",name:"Claude in Excel"},{id:"powerpoint",name:"Claude in PowerPoint"},{id:"word",name:"Claude in Word"},{id:"pdf",name:"PDF skill"}].map(s =>
+                <button key={s.id} onClick={()=>setSelectedSkillId(s.id)} className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)",background:selectedSkillId===s.id?"var(--sc-bubble)":"transparent"}}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  {s.name}
+                </button>
+              )}
+            </div>
+            {/* Personal / custom skills */}
+            {customs.length > 0 && <div className="px-3 py-1.5 mt-2">
+              <div className="text-xs font-medium px-2 mb-1" style={{color:"var(--sc-muted)"}}>Personal skills</div>
+              {customs.map(sk =>
+                <button key={sk.id} onClick={()=>setSelectedSkillId(sk.id)} className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)",background:selectedSkillId===sk.id?"var(--sc-bubble)":"transparent"}}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  {sk.name}
+                  {sk.id === customs[customs.length-1]?.id && <span className="ml-auto text-xs px-1.5 py-0.5 rounded" style={{background:"var(--sc-success-bg)",color:"var(--sc-success)"}}>New</span>}
+                </button>
+              )}
+            </div>}
+          </div>
+        </div>
+
+        {/* Skill detail */}
+        <div className="flex-1 overflow-y-auto sc-scroll" style={{background:"var(--sc-bg)"}}>
+          {(() => {
+            const sel = [...customs, {id:"excel",name:"Claude in Excel",desc:"Create and edit Excel spreadsheets",sys:"Excel skill"},{id:"powerpoint",name:"Claude in PowerPoint",desc:"Create presentations",sys:"PowerPoint skill"},{id:"word",name:"Claude in Word",desc:"Create Word documents",sys:"Word skill"},{id:"pdf",name:"PDF skill",desc:"Read and fill PDF forms",sys:"PDF skill"}].find(s=>s.id===selectedSkillId);
+            const isCustom = customs.find(s=>s.id===selectedSkillId);
+            if (!sel) return <div className="flex items-center justify-center h-full" style={{color:"var(--sc-muted)"}}><p className="text-sm">Select a skill to view details</p></div>;
+            return (
+              <div>
+                <div className="flex items-center justify-between px-8 py-5" style={{borderBottom:"1px solid var(--sc-border)",height:56}}>
+                  <span className="text-sm font-semibold" style={{color:"var(--sc-fg)"}}>{sel.name}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="rounded-full" style={{width:36,height:20,background:isCustom?"#3B82F6":"var(--sc-border)",position:"relative",cursor:"pointer",transition:"background 200ms"}}>
+                      <div style={{position:"absolute",top:2,left:isCustom?18:2,width:16,height:16,background:"white",borderRadius:"50%",transition:"left 200ms"}}/>
+                    </div>
+                    <button className="p-1.5 rounded" style={{color:"var(--sc-muted)"}}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div className="px-8 py-6">
+                  <div className="flex gap-8 mb-6 text-sm" style={{borderBottom:"1px solid var(--sc-border)",paddingBottom:"1.5rem"}}>
+                    <div><div className="text-xs font-medium mb-1" style={{color:"var(--sc-muted)"}}>Added by</div><div style={{color:"var(--sc-fg)"}}>{isCustom?"You":"Anthropic"}</div></div>
+                    <div><div className="text-xs font-medium mb-1" style={{color:"var(--sc-muted)"}}>Trigger</div><div style={{color:"var(--sc-fg)"}}>{isCustom?"Slash command + auto":"Slash command + auto"}</div></div>
+                  </div>
+                  {sel.desc && <div className="mb-6"><div className="text-xs font-medium mb-2" style={{color:"var(--sc-muted)"}}>Description</div><p className="text-sm" style={{color:"var(--sc-fg)",lineHeight:1.6}}>{sel.desc}</p></div>}
+                  <div className="rounded-xl p-6" style={{background:"var(--sc-surface)",border:"1px solid var(--sc-border)"}}>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xs font-mono" style={{color:"var(--sc-muted)"}}>SKILL.md</span>
+                      <div className="flex gap-1">
+                        <button className="p-1.5 rounded" style={{color:"var(--sc-muted)"}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                        <button className="p-1.5 rounded" style={{color:"var(--sc-muted)"}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></button>
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2" style={{fontFamily:"var(--sc-serif)",color:"var(--sc-fg)"}}>{sel.name}</h3>
+                    <p className="text-sm mb-4" style={{color:"var(--sc-muted)",lineHeight:1.6}}>{sel.desc || `A reusable skill for ${sel.name.toLowerCase()} tasks.`}</p>
+                    {isCustom && sel.sys && <>
+                      <div className="text-sm font-medium mb-2" style={{color:"var(--sc-fg)"}}>Instructions</div>
+                      <div className="text-sm space-y-1" style={{color:"var(--sc-muted)",lineHeight:1.7}}>
+                        {sel.sys.split('\n').map((line, i) => line.trim() ? <p key={i}>{line}</p> : null)}
+                      </div>
+                    </>}
+                    {!isCustom && <div className="text-sm" style={{color:"var(--sc-muted)",lineHeight:1.7}}>
+                      <p className="mb-2">This skill extends Claude with the ability to create, read, and edit {sel.name.replace("Claude in ", "")} files.</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Generates structured output directly</li>
+                        <li>Understands document formatting conventions</li>
+                        <li>Produces downloadable files</li>
+                      </ul>
+                    </div>}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>}
 
