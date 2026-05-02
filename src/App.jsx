@@ -435,9 +435,82 @@ export default function SkillCompass() {
 
         const skillId = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
         const desc = taskDesc.split('.')[0].trim();
-        const skillPreview = `**Phase 4 — Your Skill is ready**\n\nHere's what I've generated:\n\n---\n\n**📋 ${name}**\n\n\`\`\`yaml\nname: ${name}\ndescription: ${desc}\ntriggers:\n${triggers.split(/[,\n]/).map(t => t.trim()).filter(t => t).map(t => `  - "${t}"`).join("\n") || `  - "${orig.trim()}"`}\n\`\`\`\n\n**Instructions:**\n${taskDesc}\n\n**Output format:**\n${format}\n\n---\n\n**Evaluation:** I'd normally run this against a sample input to validate quality. In the full version, Claude tests the Skill before you save it.\n\n**To save:** Go to **Settings → Customize → Skills → Upload** or use the button below.\n\nWhat would you like to do?`;
 
-        const newSkill = { id:skillId, name, desc, sys:`You are a specialised assistant. Task: ${taskDesc}\nFormat: ${format}`, p50:1400, p90:2400 };
+        // Parse trigger phrases into an array
+        const triggerList = triggers.split(/[,\n]/).map(t => t.trim()).filter(t => t.length > 2);
+        const triggerPhrasesInDesc = triggerList.length > 0
+          ? ` Also triggers on phrases like ${triggerList.slice(0,3).map(t=>`"${t}"`).join(", ")}.`
+          : "";
+
+        // Parse format into inputs and output
+        const formatLines = format.split('\n').filter(l => l.trim());
+        const inputs = formatLines[0] || "User provides the relevant context";
+        const outputFormat = formatLines.slice(1).join('\n') || format;
+
+        // Generate full SKILL.md matching the template
+        const skillMd = `---
+name: ${skillId}
+description: "${desc}.${triggerPhrasesInDesc} Use this skill whenever the user asks to ${orig.toLowerCase().replace(/^(generate|create|write|build|make|draft)\s+/i,"").replace(/^(a|an|the)\s+/i,"")}."
+---
+
+# ${name}
+
+${taskDesc}
+
+## Workflow
+
+### Step 1: Understand the Request
+
+Read the user's input and identify:
+- What information or data they are providing
+- Any specific constraints, preferences, or requirements mentioned
+- The desired scope and depth of the output
+
+### Step 2: Process and Structure
+
+${inputs}
+
+Apply the following approach:
+- Break the task into clear sections
+- Prioritise the most important information first
+- Maintain consistency in tone and format throughout
+
+### Step 3: Generate Output
+
+${outputFormat || `Produce a structured output that covers all required sections.`}
+
+**Formatting rules:**
+- Use clear headers for each section
+- Use bullet points for lists, tables for comparisons
+- Keep each section concise and scannable
+- Include specific numbers, dates, or metrics where relevant
+
+### Step 4: Quality Check
+
+Before presenting the output:
+- Verify all required sections are included
+- Check that the format matches what was requested
+- Ensure nothing important from the user's input was missed
+
+### Step 5: Present Results
+
+Deliver the output directly in chat. If a document was generated, use \`present_files\` to share it with a brief summary of the key highlights.
+
+## Error Handling
+
+- **Missing input**: Ask the user for the specific information needed before proceeding
+- **Ambiguous request**: Clarify the key question before generating output
+- **Too much content**: Summarise and offer to expand specific sections on request
+
+## Example Triggers
+
+${triggerList.length > 0
+  ? triggerList.map(t => `- "${t}"`).join('\n')
+  : `- "${orig}"`}`;
+
+        const skillPreview = `**Phase 4 — Your Skill is ready ✓**\n\nHere's your SKILL.md:\n\n\`\`\`\n${skillMd}\n\`\`\`\n\n---\n\n**To install:** Save this as \`~/.claude/skills/${skillId}/SKILL.md\`\n**To use:** Type \`/${skillId}\` or just describe the task — Claude auto-invokes it.\n\n**Evaluation:** In the full version, Claude tests the Skill against sample inputs before saving. \n\nWhat would you like to do?`;
+
+        const newSkill = { id:skillId, name, desc, sys:skillMd, p50:1400, p90:2400 };
 
         setMsgs(m => m.map(x => x.id === ph.id ? {...x, content:skillPreview, pending:false, isSkillPreview:true, skillData:newSkill, taskToRun:orig} : x));
         setClarify(null);
@@ -907,9 +980,9 @@ export default function SkillCompass() {
                     <h3 className="text-lg font-semibold mb-2" style={{fontFamily:"var(--sc-serif)",color:"var(--sc-fg)"}}>{sel.name}</h3>
                     <p className="text-sm mb-4" style={{color:"var(--sc-muted)",lineHeight:1.6}}>{sel.desc || `A reusable skill for ${sel.name.toLowerCase()} tasks.`}</p>
                     {isCustom && sel.sys && <>
-                      <div className="text-sm font-medium mb-2" style={{color:"var(--sc-fg)"}}>Instructions</div>
-                      <div className="text-sm space-y-1" style={{color:"var(--sc-muted)",lineHeight:1.7}}>
-                        {sel.sys.split('\n').map((line, i) => line.trim() ? <p key={i}>{line}</p> : null)}
+                      <div className="text-sm font-medium mb-3" style={{color:"var(--sc-fg)"}}>SKILL.md</div>
+                      <div className="rounded-lg p-4 overflow-auto sc-scroll" style={{background:"var(--sc-bg)",border:"1px solid var(--sc-border)",maxHeight:400}}>
+                        <pre className="text-xs" style={{color:"var(--sc-muted)",fontFamily:"var(--sc-mono)",lineHeight:1.7,whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{sel.sys}</pre>
                       </div>
                     </>}
                     {!isCustom && <div className="text-sm" style={{color:"var(--sc-muted)",lineHeight:1.7}}>
