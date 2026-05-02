@@ -369,9 +369,23 @@ export default function SkillCompass() {
   useEffect(() => {
     if (clarify || phases) { setCls(null); return; } // mid-flow: don't classify
     if (!draft.trim() || draft.trim().length < 12) { setCls(null); return; }
-    const t = setTimeout(() => { const seq = ++rRef.current; const c = classify(draft); if (seq === rRef.current) setCls(c); }, 350);
+    const t = setTimeout(() => {
+      const seq = ++rRef.current;
+      let c = classify(draft);
+      // Check custom skills — if a trigger phrase matches, prefer the custom skill
+      if (c.dec !== "skill") {
+        const d = draft.toLowerCase();
+        for (const sk of customs) {
+          if (sk.triggers && sk.triggers.some(tr => tr.length > 3 && d.includes(tr.toLowerCase()))) {
+            c = { dec:"skill", sid:sk.id, conf:0.90, rat:`${sk.name} — matches your saved trigger phrases.`, qn:`Ready to run your ${sk.name} skill?` };
+            break;
+          }
+        }
+      }
+      if (seq === rRef.current) setCls(c);
+    }, 350);
     return () => clearTimeout(t);
-  }, [draft, clarify, phases]);
+  }, [draft, clarify, phases, customs]);
 
   const matched = cls?.dec === "skill" && cls.sid ? allSk.find(s => s.id === cls.sid) : null;
   const plainC = useMemo(() => estCost(draft.length, null), [draft.length]);
@@ -510,7 +524,7 @@ ${triggerList.length > 0
 
         const skillPreview = `**Phase 4 — Your Skill is ready ✓**\n\nHere's your SKILL.md:\n\n\`\`\`\n${skillMd}\n\`\`\`\n\n---\n\n**To install:** Save this as \`~/.claude/skills/${skillId}/SKILL.md\`\n**To use:** Type \`/${skillId}\` or just describe the task — Claude auto-invokes it.\n\n**Evaluation:** In the full version, Claude tests the Skill against sample inputs before saving. \n\nWhat would you like to do?`;
 
-        const newSkill = { id:skillId, name, desc, sys:skillMd, p50:1400, p90:2400 };
+        const newSkill = { id:skillId, name, desc, sys:skillMd, triggers:triggerList, p50:1400, p90:2400 };
 
         setMsgs(m => m.map(x => x.id === ph.id ? {...x, content:skillPreview, pending:false, isSkillPreview:true, skillData:newSkill, taskToRun:orig} : x));
         setClarify(null);
