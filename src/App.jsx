@@ -3,7 +3,6 @@ import {
   ArrowUp, Check, ChevronDown, FileText, HelpCircle, Mail,
   Sparkles, X, ThumbsUp, ThumbsDown, Play, Bot,
   GitBranch, Menu, BarChart3, Paperclip,
-  Search, MessageSquare, FolderOpen, Code, Settings, Paintbrush,
 } from "lucide-react";
 
 /* ═══ SKILLS CATALOG ═══ */
@@ -616,21 +615,25 @@ export default function SkillCompass() {
         </div>
         <div className="px-3 space-y-0.5">
           <button onClick={reset} className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> New chat
-          </button>
-          <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}><Search size={16} style={{color:"var(--sc-muted)",strokeWidth:1.5}}/> Search</button>
-          <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Chats
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> New chat
           </button>
           <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> Projects
-          </button>
-          <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}><Code size={16} style={{color:"var(--sc-muted)",strokeWidth:1.5}}/> Code</button>
-          <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg> Customize
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search
           </button>
           <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg> Design
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/></svg> Chats
+          </button>
+          <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2z"/></svg> Projects
+          </button>
+          <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Code
+          </button>
+          <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg> Customize
+          </button>
+          <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="12" r="2.5"/><circle cx="13.5" cy="17.5" r="2.5"/><path d="M12 2a10 10 0 0 1 0 20 10 10 0 0 1 0-20z"/></svg> Design
           </button>
           <button onClick={()=>setSideMore(!sideMore)} className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm" style={{color:"var(--sc-fg)"}}>
             <ChevronDown size={16} style={{color:"var(--sc-muted)",strokeWidth:1.5,transform:sideMore?"rotate(180deg)":"rotate(0deg)",transition:"transform 200ms"}}/> More
