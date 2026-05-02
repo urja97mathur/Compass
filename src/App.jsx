@@ -338,7 +338,12 @@ export default function SkillCompass() {
   const [cls, setCls] = useState(null);
   const [pend, setPend] = useState(false);
   const [clarify, setClarify] = useState(null);
-  const [customs, setCustoms] = useState([]);
+  const [customs, setCustoms] = useState(() => {
+    try {
+      const saved = localStorage.getItem("sc-custom-skills");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [tele, setTele] = useState({dec:0,acc:0,built:0,up:0,dn:0});
   const [tokUsed, setTokUsed] = useState(0);
   const [toast, setToast] = useState(null);
@@ -362,6 +367,7 @@ export default function SkillCompass() {
   const allSk = useMemo(() => [...SKILLS, ...customs], [customs]);
 
   useEffect(() => { const l = document.createElement("link"); l.rel="stylesheet"; l.href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap"; document.head.appendChild(l); return()=>{try{document.head.removeChild(l)}catch{}}; }, []);
+  useEffect(() => { try { localStorage.setItem("sc-custom-skills", JSON.stringify(customs)); } catch {} }, [customs]);
   useEffect(() => { endRef.current?.scrollIntoView({behavior:"smooth",block:"end"}); }, [msgs]);
   useEffect(() => { if(toast){const t=setTimeout(()=>setToast(null),3500);return()=>clearTimeout(t);} }, [toast]);
 
