@@ -137,6 +137,24 @@ function genPhases(draft) {
   return [{ name:"Research", sid:null, tok:"~1.5k" }, { name:"Core execution", sid:null, tok:"~2k" }, { name:"Review", sid:null, tok:"~0.8k" }];
 }
 
+function genPhaseOutput(phaseName, orig) {
+  const d = orig.toLowerCase();
+  // Extract topic from original prompt for context
+  const topic = orig.replace(/^(create|generate|write|build|draft|make|develop)\s+(a|an|the)\s+/i, "").split(/\s+(with|including|that|for)\s+/i)[0].trim();
+
+  if (phaseName === "Research") {
+    return `## Research: ${topic}\n\n### Market Context\nBefore building the ${topic.toLowerCase()}, I surveyed existing approaches and best practices across the industry.\n\n### Key Findings\n- **Standard structure:** Most ${topic.toLowerCase()} frameworks use 4-6 core sections with clear ownership assignments\n- **Common gaps:** Teams often skip success criteria, leading to ambiguous completion standards\n- **Best practice:** Top-performing teams include timeline estimates and dependency mapping at each step\n\n### Inputs Gathered\n| Source | Insight | Relevance |\n|---|---|---|\n| Industry benchmarks | 6-section framework is standard | High — use as skeleton |\n| Team interviews | Current process takes 3-5 days | High — target 50% reduction |\n| Competitor analysis | Automation at steps 2-4 is common | Medium — consider for v2 |\n\n### Recommendation for Next Phase\nProceed with a 5-section framework, prioritising clarity of ownership and measurable completion criteria at each stage.`;
+  }
+  if (phaseName === "Core execution") {
+    return `## ${topic}\n\n### Section 1: Planning & Preparation\n| Task | Owner | Timeline | Completion Criteria |\n|---|---|---|---|\n| Define scope and objectives | Project Lead | Day 1 | Written brief approved by stakeholders |\n| Identify key stakeholders | Project Lead | Day 1 | Stakeholder map with RACI matrix |\n| Set up tracking workspace | Operations | Day 2 | Shared workspace with all team members added |\n\n### Section 2: Execution\n| Task | Owner | Timeline | Completion Criteria |\n|---|---|---|---|\n| Build initial framework | Lead PM | Days 2-3 | Draft reviewed by 2 peers |\n| Gather input from cross-functional teams | All leads | Days 3-5 | Input from Eng, Design, Marketing captured |\n| Create deliverable v1 | Lead PM | Days 5-7 | First complete draft shared for review |\n\n### Section 3: Review & Iteration\n| Task | Owner | Timeline | Completion Criteria |\n|---|---|---|---|\n| Stakeholder review round | All reviewers | Days 7-8 | All comments consolidated |\n| Incorporate feedback | Lead PM | Days 8-9 | Changes tracked and addressed |\n| Final sign-off | Project Lead | Day 10 | Approved by all required signers |\n\n### Section 4: Rollout\n| Task | Owner | Timeline | Completion Criteria |\n|---|---|---|---|\n| Distribute to all teams | Operations | Day 10 | Confirmation of receipt from each team |\n| Schedule follow-up check-in | Project Lead | Day 10 | Calendar invite sent for Day 15 review |\n\n### Key Dependencies\n- Section 2 cannot start until Section 1 sign-off\n- External stakeholder input may extend Day 3-5 window\n- Final sign-off requires minimum 2 business days for review`;
+  }
+  if (phaseName === "Review") {
+    return `## Quality Review: ${topic}\n\n### Completeness Check\n- ✅ All sections present and populated\n- ✅ Ownership assigned for every task\n- ✅ Timeline estimates included\n- ✅ Completion criteria are specific and measurable\n- ⚠️ Consider adding a risk/escalation section for blockers\n\n### Consistency Check\n- Timeline totals to ~10 working days — reasonable for scope\n- Owner distribution is balanced across 3-4 roles\n- Completion criteria use observable verbs (approved, sent, added)\n\n### Gaps Identified\n1. **No escalation path** — what happens when a task is blocked? Add a 24-hour escalation trigger to project lead.\n2. **Missing success metric** — how do you measure if the ${topic.toLowerCase()} actually worked? Suggest adding a D+30 retrospective.\n3. **Dependency risk** — external stakeholder input (Section 2) is the highest-risk bottleneck. Consider pre-scheduling interviews.\n\n### Final Assessment\n**Ready to use** with minor additions. Address the escalation path and success metric gaps before rollout.`;
+  }
+  // Fallback for custom phase names
+  return `## ${phaseName}: ${topic}\n\nThis phase covers the ${phaseName.toLowerCase()} stage of the ${topic.toLowerCase()}.\n\n### Key Actions\n- Identified core requirements from the original brief\n- Structured output according to best practices\n- Applied relevant constraints and quality standards\n\n### Output\nPhase complete. Ready for the next step.`;
+}
+
 /* ═══ DEMO RESPONSES ═══ */
 const DEMO = {
   email:"Subject: Our Sincere Apologies for the Delayed Shipment\n\nHi [Client Name],\n\nI want to personally apologise for the delay in your recent shipment. This fell below the standard you expect from us, and I take full responsibility.\n\nYour order is now confirmed for delivery by [date]. As a gesture of goodwill, I'd like to offer you 15% off your next order — just use code SORRY15 at checkout.\n\nPlease don't hesitate to reach out if there's anything else I can do.\n\nBest,\n[Your name]",
@@ -341,7 +359,9 @@ export default function SkillCompass() {
   const [customs, setCustoms] = useState(() => {
     try {
       const saved = localStorage.getItem("sc-custom-skills");
-      return saved ? JSON.parse(saved) : [];
+      const parsed = saved ? JSON.parse(saved) : [];
+      console.log("[SC Debug] loaded customs from localStorage:", parsed.length, parsed.map(s => ({ id: s.id, name: s.name, triggers: s.triggers })));
+      return parsed;
     } catch { return []; }
   });
   const [tele, setTele] = useState({dec:0,acc:0,built:0,up:0,dn:0});
@@ -381,9 +401,16 @@ export default function SkillCompass() {
       // Check custom skills — if a trigger phrase matches, prefer the custom skill
       if (c.dec !== "skill") {
         const d = draft.toLowerCase();
+        console.log("[SC Debug] classify returned:", c.dec, "| customs count:", customs.length);
         for (const sk of customs) {
-          if (sk.triggers && sk.triggers.some(tr => tr.length > 3 && d.includes(tr.toLowerCase()))) {
+          console.log("[SC Debug] checking skill:", sk.name, "| triggers:", sk.triggers);
+          if (sk.triggers && sk.triggers.some(tr => {
+            const match = tr.length > 3 && d.includes(tr.toLowerCase());
+            if (match) console.log("[SC Debug] MATCH:", tr, "in", d);
+            return match;
+          })) {
             c = { dec:"skill", sid:sk.id, conf:0.90, rat:`${sk.name} — matches your saved trigger phrases.`, qn:`Ready to run your ${sk.name} skill?` };
+            console.log("[SC Debug] routing to custom skill:", sk.id);
             break;
           }
         }
@@ -531,6 +558,7 @@ ${triggerList.length > 0
         const skillPreview = `**Phase 4 — Your Skill is ready ✓**\n\nHere's your SKILL.md:\n\n\`\`\`\n${skillMd}\n\`\`\`\n\n---\n\n**To install:** Save this as \`~/.claude/skills/${skillId}/SKILL.md\`\n**To use:** Type \`/${skillId}\` or just describe the task — Claude auto-invokes it.\n\n**Evaluation:** In the full version, Claude tests the Skill against sample inputs before saving. \n\nWhat would you like to do?`;
 
         const newSkill = { id:skillId, name, desc, sys:skillMd, triggers:triggerList, p50:1400, p90:2400 };
+        console.log("[SC Debug] saving skill:", { id: skillId, name, triggers: triggerList });
 
         setMsgs(m => m.map(x => x.id === ph.id ? {...x, content:skillPreview, pending:false, isSkillPreview:true, skillData:newSkill, taskToRun:orig} : x));
         setClarify(null);
@@ -663,7 +691,7 @@ ${triggerList.length > 0
     setMsgs(m => [...m, ph]); setPend(true);
     setThinkLabel(`Running phase ${idx+1}`);
     await new Promise(r => setTimeout(r, 800 + Math.random() * 600));
-    const reply = sk ? demoChat(sk.id.includes("competitive")?"competitor analysis":"market research", "") : "[Phase output generated]";
+    const reply = sk ? demoChat(sk.id.includes("competitive")?"competitor analysis":"market research", "") : genPhaseOutput(p.name, orig);
     const tok = Math.ceil(reply.length / 4);
     setTokUsed(pr => pr + tok);
     setMsgs(m => m.map(x => x.id === ph.id ? {...x, content:reply, pending:false, tok} : x));
@@ -765,7 +793,6 @@ ${triggerList.length > 0
               <h1 className="mb-4 flex items-center gap-3" style={{fontFamily:"var(--sc-serif)",fontWeight:400,fontSize:32}}><CM size={36}/> Good morning. Ready when you are</h1>
               <p className="text-sm mb-8 text-center max-w-lg" style={{color:"var(--sc-muted)"}}>Claude can help you with writing, analysis, coding, research, and more.</p>
               <div className="w-full max-w-2xl"><div className="flex items-center gap-2 mb-3"><Sparkles size={14} style={{color:"var(--sc-muted)"}}/><span className="text-xs font-medium tracking-wide uppercase" style={{color:"var(--sc-muted)"}}>Try a scenario</span></div><div className="grid grid-cols-1 sm:grid-cols-3 gap-3">{SUGGESTIONS.map(s=>{const Icon=s.icon;return(<button key={s.label} onClick={()=>fill(s.prompt)} className="flex flex-col items-start gap-2 p-4 rounded-xl text-left" style={{background:"var(--sc-surface)",border:"1px solid var(--sc-border)",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--sc-accent)";e.currentTarget.style.transform="translateY(-1px)"}} onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--sc-border)";e.currentTarget.style.transform="translateY(0)"}}><div className="rounded-lg p-2" style={{background:"var(--sc-chip-bg)",color:"var(--sc-accent)"}}><Icon size={16}/></div><div><div className="text-sm font-medium">{s.label}</div><div className="text-xs mt-0.5" style={{color:"var(--sc-muted)"}}>{s.sub}</div></div></button>);})}</div></div>
-              {customs.length > 0 && <div className="mt-6 text-xs flex items-center gap-2" style={{color:"var(--sc-success)"}}><Check size={12}/>{customs.length} custom skill{customs.length>1?"s":""}: {customs.map(s=>s.name).join(", ")}</div>}
             </div>
           ) : (
             <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
